@@ -30,10 +30,14 @@ const AskQuery: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{chatTitle} | ChatQuery</title>
+        <title>{chatTitle || "New Chat"} | ChatQuery</title>
       </Helmet>
       
       <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+        <div className="border-b border-border bg-background/50 backdrop-blur-sm px-4 py-2">
+          <h1 className="text-lg font-medium truncate">{chatTitle || "New Chat"}</h1>
+        </div>
+        
         <ChatHistory 
           chatId={isNewChat ? null : conversationId}
           onChatLoaded={handleChatTitleChange}

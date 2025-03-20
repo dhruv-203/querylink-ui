@@ -1,159 +1,184 @@
-import { toast } from "@/components/ui/sonner";
+
+import { toast } from "sonner";
 
 // Types
 export interface ChatMessage {
   id: string;
+  chatId: string;
+  role: "user" | "assistant" | "system";
   content: string;
-  role: 'user' | 'assistant';
-  createdAt: string;
+  timestamp: number;
 }
 
 export interface ChatHistory {
   id: string;
   title: string;
   lastMessage: string;
-  createdAt: string;
-  updatedAt: string;
+  timestamp: number;
 }
 
-// Mock data
-const mockChatHistory: ChatHistory[] = Array.from({ length: 10 }).map((_, i) => ({
-  id: `chat-${i + 1}`,
-  title: `Chat ${i + 1} ${i % 3 === 0 ? 'about machine learning' : i % 3 === 1 ? 'regarding data analysis' : 'on natural language processing'}`,
-  lastMessage: `Last message from chat ${i + 1}`,
-  createdAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
-  updatedAt: new Date(Date.now() - i * 12 * 60 * 60 * 1000).toISOString(),
-}));
-
-const mockChats: Record<string, ChatMessage[]> = {};
-
-// Initialize some mock conversations
-mockChatHistory.forEach((history) => {
-  const numMessages = Math.floor(Math.random() * 10) + 2;
-  const messages: ChatMessage[] = [];
-  
-  for (let i = 0; i < numMessages; i++) {
-    const isUserMessage = i % 2 === 0;
-    messages.push({
-      id: `msg-${history.id}-${i}`,
-      content: isUserMessage 
-        ? `User question ${Math.floor(i/2) + 1} for chat ${history.id}?`
-        : `This is a detailed response to question ${Math.floor(i/2) + 1} in chat ${history.id}.`,
-      role: isUserMessage ? 'user' : 'assistant',
-      createdAt: new Date(Date.now() - (numMessages - i) * 60 * 1000).toISOString(),
-    });
+// In-memory data store for demo purposes
+let chatHistories: ChatHistory[] = [
+  {
+    id: "chat-1",
+    title: "First Conversation",
+    lastMessage: "What can you help me with?",
+    timestamp: Date.now()
+  },
+  {
+    id: "chat-2",
+    title: "Data Analysis",
+    lastMessage: "Can you analyze this dataset?",
+    timestamp: Date.now() - 1000 * 60 * 60
   }
-  
-  mockChats[history.id] = messages;
-});
+];
 
-// API functions with simulated network delay
+let chatMessages: Record<string, ChatMessage[]> = {
+  "chat-1": [
+    {
+      id: "msg-1",
+      chatId: "chat-1",
+      role: "user",
+      content: "What can you help me with?",
+      timestamp: Date.now() - 1000 * 60 * 5
+    },
+    {
+      id: "msg-2",
+      chatId: "chat-1",
+      role: "assistant",
+      content: "I can help you analyze your data, answer questions, and provide insights based on the information you provide. Just upload your data or ask me a question to get started!",
+      timestamp: Date.now() - 1000 * 60 * 4
+    }
+  ],
+  "chat-2": [
+    {
+      id: "msg-3",
+      chatId: "chat-2",
+      role: "user",
+      content: "Can you analyze this dataset?",
+      timestamp: Date.now() - 1000 * 60 * 60
+    },
+    {
+      id: "msg-4",
+      chatId: "chat-2",
+      role: "assistant",
+      content: "Of course! Please upload your dataset and I'll analyze it for you.",
+      timestamp: Date.now() - 1000 * 60 * 59
+    }
+  ]
+};
+
+// Helper function to simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// API Functions
 export const fetchChatHistory = async (): Promise<ChatHistory[]> => {
-  await delay(800);
-  return [...mockChatHistory];
+  await delay(500); // Simulate API delay
+  return [...chatHistories].sort((a, b) => b.timestamp - a.timestamp);
 };
 
 export const fetchChatById = async (chatId: string): Promise<ChatMessage[]> => {
-  await delay(600);
-  return mockChats[chatId] || [];
+  await delay(300); // Simulate API delay
+  
+  const messages = chatMessages[chatId];
+  if (!messages) {
+    throw new Error(`Chat with ID ${chatId} not found`);
+  }
+  
+  return [...messages].sort((a, b) => a.timestamp - b.timestamp);
 };
 
-export const sendMessage = async (chatId: string | null, message: string): Promise<{ chatId: string, message: ChatMessage }> => {
-  await delay(500);
+export const sendMessage = async (chatId: string | null, content: string): Promise<{ chatId: string }> => {
+  await delay(500); // Simulate API delay
   
-  const newChatId = chatId || `chat-${Date.now()}`;
-  const userMessage: ChatMessage = {
-    id: `msg-${newChatId}-${Date.now()}`,
-    content: message,
-    role: 'user',
-    createdAt: new Date().toISOString(),
-  };
+  let currentChatId = chatId;
   
-  if (!mockChats[newChatId]) {
-    mockChats[newChatId] = [];
-    
-    // Create new chat history entry
-    const newHistoryEntry: ChatHistory = {
-      id: newChatId,
-      title: message.length > 30 ? `${message.substring(0, 30)}...` : message,
-      lastMessage: message,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  // If it's a new chat, create a new chat history entry
+  if (!currentChatId) {
+    currentChatId = `chat-${Date.now()}`;
+    const newChatHistory: ChatHistory = {
+      id: currentChatId,
+      title: content.length > 30 ? `${content.substring(0, 30)}...` : content,
+      lastMessage: content,
+      timestamp: Date.now()
     };
     
-    mockChatHistory.unshift(newHistoryEntry);
+    chatHistories.push(newChatHistory);
+    chatMessages[currentChatId] = [];
   }
   
-  mockChats[newChatId].push(userMessage);
-  
-  // Simulate AI response
-  await delay(1000);
-  
-  const aiResponse: ChatMessage = {
-    id: `msg-${newChatId}-${Date.now() + 1}`,
-    content: `This is a response to: "${message}"`,
-    role: 'assistant',
-    createdAt: new Date().toISOString(),
+  // Add user message
+  const userMessage: ChatMessage = {
+    id: `msg-${Date.now()}-1`,
+    chatId: currentChatId,
+    role: "user",
+    content,
+    timestamp: Date.now()
   };
   
-  mockChats[newChatId].push(aiResponse);
+  // Add assistant response
+  const assistantMessage: ChatMessage = {
+    id: `msg-${Date.now()}-2`,
+    chatId: currentChatId,
+    role: "assistant",
+    content: "I've received your message and I'm processing it. Here's what I can tell you: This is a simulated response for demonstration purposes. In a real application, this would be an actual response from the AI model based on your input.",
+    timestamp: Date.now() + 100
+  };
   
-  // Update chat history
-  const historyIndex = mockChatHistory.findIndex(h => h.id === newChatId);
-  if (historyIndex !== -1) {
-    mockChatHistory[historyIndex].lastMessage = aiResponse.content;
-    mockChatHistory[historyIndex].updatedAt = new Date().toISOString();
+  // Update chat messages
+  if (!chatMessages[currentChatId]) {
+    chatMessages[currentChatId] = [];
   }
   
-  return { chatId: newChatId, message: userMessage };
-};
-
-export const renameChatHistory = async (chatId: string, newTitle: string): Promise<ChatHistory> => {
-  await delay(300);
+  chatMessages[currentChatId].push(userMessage);
+  chatMessages[currentChatId].push(assistantMessage);
   
-  const historyIndex = mockChatHistory.findIndex(h => h.id === chatId);
-  if (historyIndex === -1) throw new Error('Chat not found');
+  // Update chat history
+  const chatHistoryIndex = chatHistories.findIndex(ch => ch.id === currentChatId);
+  if (chatHistoryIndex !== -1) {
+    chatHistories[chatHistoryIndex].lastMessage = content;
+    chatHistories[chatHistoryIndex].timestamp = Date.now();
+  }
   
-  mockChatHistory[historyIndex].title = newTitle;
-  mockChatHistory[historyIndex].updatedAt = new Date().toISOString();
-  
-  return mockChatHistory[historyIndex];
+  return { chatId: currentChatId };
 };
 
 export const deleteChatHistory = async (chatId: string): Promise<void> => {
-  await delay(300);
+  await delay(300); // Simulate API delay
   
-  const historyIndex = mockChatHistory.findIndex(h => h.id === chatId);
-  if (historyIndex === -1) throw new Error('Chat not found');
+  chatHistories = chatHistories.filter(ch => ch.id !== chatId);
+  delete chatMessages[chatId];
+};
+
+export const renameChatHistory = async (chatId: string, newTitle: string): Promise<ChatHistory> => {
+  await delay(300); // Simulate API delay
   
-  mockChatHistory.splice(historyIndex, 1);
-  delete mockChats[chatId];
+  const chatHistoryIndex = chatHistories.findIndex(ch => ch.id === chatId);
+  if (chatHistoryIndex === -1) {
+    throw new Error(`Chat with ID ${chatId} not found`);
+  }
+  
+  chatHistories[chatHistoryIndex].title = newTitle;
+  
+  return chatHistories[chatHistoryIndex];
 };
 
 export const uploadCSV = async (file: File): Promise<{ success: boolean; message: string }> => {
-  await delay(1500);
+  await delay(1000); // Simulate upload time
   
-  // Simulate success (90% of the time) or failure
-  const isSuccess = Math.random() > 0.1;
-  
-  if (isSuccess) {
-    return { success: true, message: `File "${file.name}" uploaded successfully!` };
-  } else {
-    throw new Error('Failed to upload file. Please try again.');
-  }
+  // This is a mock function - no actual file upload happens
+  return {
+    success: true,
+    message: `Successfully uploaded and processed ${file.name}`
+  };
 };
 
-export const uploadTextData = async (text: string): Promise<{ success: boolean; message: string }> => {
-  await delay(1200);
+export const uploadText = async (text: string): Promise<{ success: boolean; message: string }> => {
+  await delay(800); // Simulate processing time
   
-  // Simulate success (90% of the time) or failure
-  const isSuccess = Math.random() > 0.1;
-  
-  if (isSuccess) {
-    return { success: true, message: 'Text data uploaded successfully!' };
-  } else {
-    throw new Error('Failed to upload text data. Please try again.');
-  }
+  // This is a mock function - no actual text processing happens
+  return {
+    success: true,
+    message: `Successfully processed ${text.length} characters of text`
+  };
 };

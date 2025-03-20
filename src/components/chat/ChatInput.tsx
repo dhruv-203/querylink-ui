@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -55,9 +56,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ chatId, onMessageSent, disabled =
 
   if (disabled) {
     return (
-      <div className="border-t px-4 py-4 glass-effect sticky bottom-0 z-10">
+      <div className="border-t border-border px-4 py-4 glass-effect sticky bottom-0 z-10">
         <div className="container max-w-4xl flex gap-4 items-center">
-          <Button onClick={handleNewChat} className="w-full flex gap-2 items-center">
+          <Button onClick={handleNewChat} className="w-full flex gap-2 items-center bg-primary hover:bg-primary/90">
             <Plus className="h-4 w-4" />
             New Chat
           </Button>
@@ -67,7 +68,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ chatId, onMessageSent, disabled =
   }
 
   return (
-    <div className="border-t px-4 py-4 glass-effect sticky bottom-0 z-10">
+    <div className="border-t border-border px-4 py-4 glass-effect sticky bottom-0 z-10">
       <div className="container max-w-4xl">
         <div className="relative">
           <Textarea
@@ -76,13 +77,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ chatId, onMessageSent, disabled =
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your message..."
-            className="resize-none pr-12 max-h-32 py-3 shadow-subtle bg-white dark:bg-gray-900 border-muted"
+            className="resize-none pr-12 max-h-32 py-3 shadow-subtle bg-card border-input"
             disabled={isSubmitting}
             rows={1}
           />
           <Button
             size="icon"
-            className="absolute right-2 bottom-1.5 h-8 w-8"
+            className="absolute right-2 bottom-1.5 h-8 w-8 bg-primary hover:bg-primary/90"
             onClick={handleSendMessage}
             disabled={!message.trim() || isSubmitting}
           >
