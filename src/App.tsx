@@ -39,4 +39,3 @@ const App = () => (
 );
 
 export default App;
-</lov-add-dependency>react-helmet-async@latest</lov-add-dependency>
