@@ -21,6 +21,11 @@ const AskQuery: React.FC = () => {
     // If it was a new chat, navigate to the new conversation route
     if (isNewChat) {
       navigate(`/ask-query/${chatId}`, { replace: true });
+      
+      // Update global chat list
+      if (typeof window !== 'undefined' && (window as any).updateChatList) {
+        (window as any).updateChatList();
+      }
     } else {
       // Otherwise just increment the counter to trigger a re-fetch
       setChatUpdated(prev => prev + 1);

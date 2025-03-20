@@ -35,6 +35,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ chatId, onMessageSent, disabled =
     try {
       const { chatId: newChatId } = await sendMessage(chatId, message);
       setMessage("");
+      
+      // Call the global update function to refresh the sidebar
+      if (typeof window !== 'undefined' && (window as any).updateChatList) {
+        (window as any).updateChatList();
+      }
+      
       onMessageSent(newChatId);
     } catch (error) {
       toast.error("Failed to send message. Please try again.");

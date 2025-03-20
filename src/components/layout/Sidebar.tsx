@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MessageSquare, Upload, PenLine, Trash2, X, Menu as MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,10 @@ import { ChatHistory, fetchChatHistory, renameChatHistory, deleteChatHistory } f
 interface SidebarProps {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  chatListUpdated?: number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, chatListUpdated = 0 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [chatHistories, setChatHistories] = useState<ChatHistory[]>([]);
@@ -26,7 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
   const [selectedChat, setSelectedChat] = useState<ChatHistory | null>(null);
   const [newTitle, setNewTitle] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadChatHistory = async () => {
       setIsLoading(true);
       try {
@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
     };
 
     loadChatHistory();
-  }, []);
+  }, [chatListUpdated]);
 
   const handleChatClick = (chatId: string) => {
     navigate(`/ask-query/${chatId}`);
@@ -171,7 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
                       key={chat.id}
                       onClick={() => handleChatClick(chat.id)}
                       className={cn(
-                        "flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors",
+                        "flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors group",
                         isActive 
                           ? "bg-[#2A2F3C] text-white" 
                           : "text-gray-300 hover:bg-[#2A2F3C]/70 hover:text-white"
@@ -181,7 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
                         <p className="text-sm font-medium truncate">{chat.title}</p>
                         <p className="text-xs text-gray-400 truncate">{chat.lastMessage}</p>
                       </div>
-                      <div className="flex items-center gap-1 opacity-100">
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button 
@@ -217,13 +217,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
                 {chatHistories.length === 0 && (
                   <div className="px-3 py-10 text-center">
                     <p className="text-sm text-gray-400">No chat history found</p>
-                    <Button 
-                      variant="link" 
-                      className="mt-2 text-blue-400 hover:text-blue-300"
-                      onClick={() => navigate('/ask-query/new')}
-                    >
-                      Start a new chat
-                    </Button>
                   </div>
                 )}
               </div>
