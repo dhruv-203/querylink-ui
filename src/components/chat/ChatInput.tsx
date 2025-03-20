@@ -1,11 +1,11 @@
-
-import React, { useState, useRef, useEffect } from "react";
-import { Send, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Plus, Send } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+// import { toast } from "sonner";
 import { sendMessage } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface ChatInputProps {
   chatId: string | null;
@@ -13,7 +13,11 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ chatId, onMessageSent, disabled = false }) => {
+const ChatInput: React.FC<ChatInputProps> = ({
+  chatId,
+  onMessageSent,
+  disabled = false,
+}) => {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -29,18 +33,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ chatId, onMessageSent, disabled =
 
   const handleSendMessage = async () => {
     if (!message.trim() || isSubmitting) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const { chatId: newChatId } = await sendMessage(chatId, message);
       setMessage("");
-      
+
       // Call the global update function to refresh the sidebar
-      if (typeof window !== 'undefined' && (window as any).updateChatList) {
+      if (typeof window !== "undefined" && (window as any).updateChatList) {
         (window as any).updateChatList();
       }
-      
+
       onMessageSent(newChatId);
     } catch (error) {
       toast.error("Failed to send message. Please try again.");
@@ -64,7 +68,10 @@ const ChatInput: React.FC<ChatInputProps> = ({ chatId, onMessageSent, disabled =
     return (
       <div className="border-t border-border px-4 py-4 glass-effect sticky bottom-0 z-10">
         <div className="container max-w-4xl flex gap-4 items-center">
-          <Button onClick={handleNewChat} className="w-full flex gap-2 items-center bg-primary hover:bg-primary/90">
+          <Button
+            onClick={handleNewChat}
+            className="w-full flex gap-2 items-center bg-primary hover:bg-primary/90"
+          >
             <Plus className="h-4 w-4" />
             New Chat
           </Button>

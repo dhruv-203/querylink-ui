@@ -1,14 +1,12 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Helmet, HelmetProvider } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import AskQuery from "@/pages/AskQuery";
-import UploadData from "@/pages/UploadData";
 import NotFound from "@/pages/NotFound";
+import UploadData from "@/pages/UploadData";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Helmet, HelmetProvider } from "react-helmet-async";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Slide, ToastContainer } from "react-toastify";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -17,8 +15,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner position="top-right" />
+        <ToastContainer
+          position="top-right"
+          autoClose={2000}
+          hideProgressBar={true}
+          pauseOnHover
+          transition={Slide}
+        />
         <BrowserRouter>
           <Helmet>
             <title>ChatQuery</title>

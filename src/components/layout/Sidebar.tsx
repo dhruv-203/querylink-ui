@@ -1,14 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { MessageSquare, Upload, PenLine, Trash2, X, Menu as MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  ChatHistory,
+  deleteChatHistory,
+  fetchChatHistory,
+  renameChatHistory,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { ChatHistory, fetchChatHistory, renameChatHistory, deleteChatHistory } from "@/lib/api";
+import {
+  Menu as MenuIcon,
+  MessageSquare,
+  PenLine,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -16,7 +38,11 @@ interface SidebarProps {
   chatListUpdated?: number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, chatListUpdated = 0 }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  isSidebarOpen,
+  toggleSidebar,
+  chatListUpdated = 0,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [chatHistories, setChatHistories] = useState<ChatHistory[]>([]);
@@ -71,11 +97,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
 
   const handleRename = async () => {
     if (!selectedChat || !newTitle.trim()) return;
-    
+
     try {
       const updatedChat = await renameChatHistory(selectedChat.id, newTitle);
-      setChatHistories(prev => 
-        prev.map(chat => chat.id === updatedChat.id ? updatedChat : chat)
+      setChatHistories((prev) =>
+        prev.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
       );
       setRenameDialogOpen(false);
       toast.success("Chat renamed successfully");
@@ -86,61 +112,68 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
 
   const handleDelete = async () => {
     if (!selectedChat) return;
-    
+
     try {
       await deleteChatHistory(selectedChat.id);
-      setChatHistories(prev => prev.filter(chat => chat.id !== selectedChat.id));
+      setChatHistories((prev) =>
+        prev.filter((chat) => chat.id !== selectedChat.id)
+      );
       setDeleteDialogOpen(false);
-      
+
       if (location.pathname.includes(selectedChat.id)) {
         navigate("/ask-query/new");
       }
-      
+
       toast.success("Chat deleted successfully");
     } catch (error) {
       toast.error("Failed to delete chat");
     }
   };
 
-  const isAskQueryActive = location.pathname.startsWith('/ask-query');
-  const isUploadDataActive = location.pathname.startsWith('/upload-data');
+  const isAskQueryActive = location.pathname.startsWith("/ask-query");
+  const isUploadDataActive = location.pathname.startsWith("/upload-data");
 
   return (
     <>
-      <div 
+      <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col w-72 bg-[#1A1F2C] border-r border-[#2A2F3C] transition-transform duration-300 ease-in-out shadow-lg md:shadow-none",
+          "fixed inset-y-0 left-0 z-50  flex flex-col w-72 bg-[#1A1F2C] border-r border-[#2A2F3C] transition-transform duration-300 ease-in-out shadow-lg md:shadow-none",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
         <div className="flex items-center justify-between p-4 border-b border-[#2A2F3C]">
           <h2 className="font-semibold text-lg text-white">ChatQuery</h2>
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden text-white hover:bg-[#2A2F3C]">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className=" text-white hover:bg-[#2A2F3C]"
+          >
             <X className="h-5 w-5" />
           </Button>
         </div>
-        
+
         <div className="flex flex-col gap-1 px-3 mt-3">
           <Button
             variant={isAskQueryActive ? "secondary" : "ghost"}
             className={cn(
               "justify-start gap-2",
-              isAskQueryActive 
-                ? "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]" 
+              isAskQueryActive
+                ? "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]"
                 : "text-gray-300 hover:bg-[#2A2F3C] hover:text-white"
             )}
-            onClick={() => navigate('/ask-query/new')}
+            onClick={() => navigate("/ask-query/new")}
           >
             <MessageSquare className="h-4 w-4" />
             Ask a Query
           </Button>
-          
+
           <Button
             variant={isUploadDataActive ? "secondary" : "ghost"}
             className={cn(
               "justify-start gap-2",
-              isUploadDataActive 
-                ? "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]" 
+              isUploadDataActive
+                ? "bg-[#2A2F3C] text-white hover:bg-[#3A3F4C]"
                 : "text-gray-300 hover:bg-[#2A2F3C] hover:text-white"
             )}
             onClick={handleUploadData}
@@ -149,9 +182,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
             Upload Data
           </Button>
         </div>
-        
+
         <div className="mt-6 px-3 flex-1 overflow-hidden flex flex-col">
-          <h3 className="text-xs font-medium text-gray-400 mb-2 px-3">CHAT HISTORY</h3>
+          <h3 className="text-xs font-medium text-gray-400 mb-2 px-3">
+            CHAT HISTORY
+          </h3>
           {isLoading ? (
             <div className="flex items-center justify-center py-4">
               <div className="animate-pulse w-full space-y-2">
@@ -164,29 +199,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
             <ScrollArea className="flex-1 pr-2">
               <div className="space-y-1">
                 {chatHistories.map((chat) => {
-                  const isActive = location.pathname.includes(chat.id);
-                  
+                  const isActive = location.pathname.split("/")[2] === chat.id;
                   return (
                     <div
                       key={chat.id}
                       onClick={() => handleChatClick(chat.id)}
                       className={cn(
                         "flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors group",
-                        isActive 
-                          ? "bg-[#2A2F3C] text-white" 
+                        isActive
+                          ? "bg-[#2A2F3C] text-white"
                           : "text-gray-300 hover:bg-[#2A2F3C]/70 hover:text-white"
                       )}
                     >
                       <div className="flex-1 truncate pr-2">
-                        <p className="text-sm font-medium truncate">{chat.title}</p>
-                        <p className="text-xs text-gray-400 truncate">{chat.lastMessage}</p>
+                        <p className="text-sm font-medium truncate">
+                          {chat.title}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">
+                          {chat.lastMessage}
+                        </p>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-7 w-7 hover:bg-[#3A3F4C]"
                               onClick={(e) => openRenameDialog(chat, e)}
                             >
@@ -195,12 +233,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
                           </TooltipTrigger>
                           <TooltipContent>Rename</TooltipContent>
                         </Tooltip>
-                        
+
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-7 w-7 hover:bg-[#3A3F4C]"
                               onClick={(e) => openDeleteDialog(chat, e)}
                             >
@@ -213,10 +251,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
                     </div>
                   );
                 })}
-                
+
                 {chatHistories.length === 0 && (
                   <div className="px-3 py-10 text-center">
-                    <p className="text-sm text-gray-400">No chat history found</p>
+                    <p className="text-sm text-gray-400">
+                      No chat history found
+                    </p>
                   </div>
                 )}
               </div>
@@ -224,14 +264,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
           )}
         </div>
       </div>
-      
+
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
           onClick={toggleSidebar}
         />
       )}
-      
+
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
         <DialogContent className="sm:max-w-md bg-[#1A1F2C] text-white border-[#2A2F3C]">
           <DialogHeader>
@@ -246,12 +286,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRenameDialogOpen(false)} className="border-[#3A3F4C] text-gray-300 hover:bg-[#2A2F3C] hover:text-white">Cancel</Button>
-            <Button onClick={handleRename} className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
+            <Button
+              variant="outline"
+              onClick={() => setRenameDialogOpen(false)}
+              className="border-[#3A3F4C] text-gray-300 hover:bg-[#2A2F3C] hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRename}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md bg-[#1A1F2C] text-white border-[#2A2F3C]">
           <DialogHeader>
@@ -259,12 +310,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-gray-400">
-              Are you sure you want to delete this chat? This action cannot be undone.
+              Are you sure you want to delete this chat? This action cannot be
+              undone.
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="border-[#3A3F4C] text-gray-300 hover:bg-[#2A2F3C] hover:text-white">Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              className="border-[#3A3F4C] text-gray-300 hover:bg-[#2A2F3C] hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -272,11 +332,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, 
   );
 };
 
-export const SidebarToggle: React.FC<{ toggleSidebar: () => void }> = ({ toggleSidebar }) => {
+export const SidebarToggle: React.FC<{ toggleSidebar: () => void }> = ({
+  toggleSidebar,
+}) => {
   return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={toggleSidebar}
       className="md:hidden ml-2 text-white hover:bg-[#2A2F3C]"
     >

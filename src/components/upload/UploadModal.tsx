@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { UploadCloud, FileText } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import { uploadCSV, uploadText } from "@/lib/api";
 
 interface UploadModalProps {
