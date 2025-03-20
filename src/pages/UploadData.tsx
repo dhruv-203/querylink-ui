@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import { UploadCloud, FileText } from "lucide-react";
 import { UploadCSVModal, UploadTextModal } from "@/components/upload/UploadModal";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";

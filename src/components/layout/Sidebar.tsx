@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, Plus, MessageSquare, Upload, PenLine, Trash2, X, Menu as MenuIcon } from "lucide-react";
@@ -7,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ChatHistory, fetchChatHistory, renameChatHistory, deleteChatHistory } from "@/lib/api";
 
@@ -26,7 +25,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
   const [selectedChat, setSelectedChat] = useState<ChatHistory | null>(null);
   const [newTitle, setNewTitle] = useState("");
 
-  // Fetch chat history on mount
   React.useEffect(() => {
     const loadChatHistory = async () => {
       setIsLoading(true);
@@ -100,7 +98,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
       setChatHistories(prev => prev.filter(chat => chat.id !== selectedChat.id));
       setDeleteDialogOpen(false);
       
-      // If we're currently viewing the deleted chat, navigate to a new chat
       if (location.pathname.includes(selectedChat.id)) {
         navigate("/ask-query/new");
       }
@@ -244,7 +241,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
         </div>
       </div>
       
-      {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
@@ -252,7 +248,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
         />
       )}
       
-      {/* Rename Dialog */}
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -273,7 +268,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
         </DialogContent>
       </Dialog>
       
-      {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

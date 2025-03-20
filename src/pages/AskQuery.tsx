@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import ChatHistory from "@/components/chat/ChatHistory";
 import ChatInput from "@/components/chat/ChatInput";
 
